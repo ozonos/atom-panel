@@ -5,9 +5,10 @@ Extension's version: 0.2;
 Recent changes in the new version: 
 	1.Code has been simplified. 
 	2.Fixed bug with on / off extensions in gnome-tweak-tool. 
-	3.It is evident that css-file is not loaded in the code. However, GNOME will connect automatically. Almost all design changes occur in the 		file stylesheet.css. In any case does not load css-files via js - script. Otherwise, the extension will not turn off after gnome-tweak-tool. 		4.Images folder has been deleted. 
-	4.Css-file has been simplified compared to the previous. 
-	5.Brackets in the code will not touch. Since I find it easier "to compile it in the head", to find and remove bugs. 
+	3.It is evident that css-file is not loaded in the code. However, GNOME will connect automatically. Almost all design changes occur in the 		file stylesheet.css. In any case does not load css-files via js - script. Otherwise, the extension will not turn off after gnome-tweak-tool. 		
+	4.Images folder has been deleted. 
+	5.Css-file has been simplified compared to the previous. 
+	
 
 Waiting for feedback.
 

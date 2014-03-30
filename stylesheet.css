@@ -1,0 +1,25 @@
+.popup-menu-boxpointer,
+.candidate-popup-boxpointer {
+    -arrow-border-radius: 0px;
+    -arrow-background-color: #2d2d2d;
+    -arrow-border-width: 0px;
+    -arrow-border-color: #a5a5a5;
+    -arrow-base: 24px;
+    -arrow-rise: 11px;
+}
+#panel {
+    background-color: #2d2d2d;
+    font-weight: bold;
+    height: 1.86em;
+}
+
+
+
+.panel-corner {
+    -panel-corner-radius: 6px;
+    -panel-corner-background-color: #2d2d2d;
+    -panel-corner-border-width: 2px;
+    -panel-corner-border-color: transparent;
+}
+
+

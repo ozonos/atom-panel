@@ -1,11 +1,12 @@
 /*
-									Release Notes: 
+ * Release Notes: 
 Description of Revision: This panel was developed by Vladimir Khrustaliov for the Numix Project,but is not ended.
 Extension's version: 0.2;
 Recent changes in the new version: 
 	1.Code has been simplified. 
 	2.Fixed bug with on / off extensions in gnome-tweak-tool. 
-	3.It is evident that css-file is not loaded in the code. However, GNOME will connect automatically. Almost all design changes occur in the 		file stylesheet.css. In any case does not load css-files via js - script. Otherwise, the extension will not turn off after gnome-tweak-tool. 		
+	3.It is evident that css-file is not loaded in the code. 
+	* However, GNOME will connect automatically. Almost all design changes occur in the 		file stylesheet.css. In any case does not load css-files via js - script. Otherwise, the extension will not turn off after gnome-tweak-tool. 		
 	4.Images folder has been deleted. 
 	5.Css-file has been simplified compared to the previous. 
 	
@@ -22,35 +23,37 @@ E-mail: vova.jameson2010@yandex.ru
 const St = imports.gi.St;
 const Main = imports.ui.main;
 
-function init(extensionMeta){
-	let defaultStylesheet = Main.getThemeStylesheet();
-  
-	Main.overview.connect('showing', opacityOn);//When we open the overview, function is performed "opacityOn ()"
-	Main.overview.connect('hiding', opacityOff);//When we close the overview, function is performed "opacityOff ()"
-}
-function opacityOn(){
-	imports.ui.main.panel.actor.set_style('background-color: rgba(0,0,0,0)');//Establish a transparent background panel while executing
-}
-function opacityOff(){
-	imports.ui.main.panel.actor.set_style('background-color: #2d2d2d');//Remove the transparent background
-}
-function std(){
-	imports.ui.main.panel.actor.set_style('background-color: black');//Establish a black background panel while executing
+
+function init(){
+	/*  do nothing  */
 }
 
-function enable(){ //What happens if the extension starts.
-
-	opacityOff();//Specify the desired color panel.
-	Main.overview.connect('showing', opacityOn);//When we open the overview, function is performed "opacityOn ()"
-	Main.overview.connect('hiding', opacityOff);//When we close the overview, function is performed "opacityOff ()"
-
+function setPanelTransparent(){
+	imports.ui.main.panel.actor.set_style('background-color: rgba(0,0,0,0)');
 }
 
-function disable(){//What happens if the extension is turned off.
+function setPanelSolidColor(){
+	//imports.ui.main.panel.actor.set_style('background-color: #2d2d2d');
+}
 
-	std();//Return standard color panel.
-	Main.overview.connect('showing', std);//When we open the overview, function is performed "std ()"
-	Main.overview.connect('hiding', std);//When we close the overview, function is performed "std ()"
+function setPanelDefaultColor(){
+	/*How can we be certain the panel color is always black? 
+	 * */
+	imports.ui.main.panel.actor.set_style('background-color: black');
+}
+
+function enable(){ 
+
+	setPanelSolidColor();
+	this.showingHandler = Main.overview.connect('showing', setPanelTransparent);
+	this.hidingHandler = Main.overview.connect('hiding', setPanelSolidColor);
+}
+
+function disable(){
+
+	setPanelDefaultColor();
+	Main.overview.disconnect(this.showingHandler);
+	Main.overview.disconnect(this.hidingHandler);
 
 }
 

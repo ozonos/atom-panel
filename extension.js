@@ -17,7 +17,7 @@
  * 	1. Embrace CamelCase for clear function naming and readability
  * 	2. Added Connect Handler ID's we can grab to disconnect in a clean way
  * 	3. Separate intial recoloring of panel from transparency functions
- * 	4. Added constant Panel Object for the sake o simplicity
+ * 	4. Added constant Panel Object for the sake of simplicity
  * 	5. Cleaned init cause it was all duplicated code from enable (and its supposed to be empty anyways)
  * 	6. Cleaned up credits
  * 
@@ -48,22 +48,18 @@ function setPanelSolidColor(){
 }
 
 function setPanelDefaultColor(){
-	
 	Panel.actor.set_style('background-color: black');
 }
 
 function enable(){ 
-
 	setPanelSolidColor();
 	this.showingHandler = Main.overview.connect('showing', setPanelTransparent);
 	this.hidingHandler = Main.overview.connect('hiding', unsetPanelTransparent);
 }
 
 function disable(){
-
 	setPanelDefaultColor();
 	Main.overview.disconnect(this.showingHandler);
 	Main.overview.disconnect(this.hidingHandler);
-
 }
 

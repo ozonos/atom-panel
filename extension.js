@@ -30,7 +30,6 @@
 const Main = imports.ui.main;
 const Panel = imports.ui.main.panel;
 
-
 function init(){
 	/*  do nothing  */
 }
@@ -62,4 +61,3 @@ function disable(){
 	Main.overview.disconnect(this.showingHandler);
 	Main.overview.disconnect(this.hidingHandler);
 }
-

@@ -1,56 +1,64 @@
-/*
-									Release Notes: 
-Description of Revision: This panel was developed by Vladimir Khrustaliov for the Numix Project,but is not ended.
-Extension's version: 0.2;
-Recent changes in the new version: 
-	1.Code has been simplified. 
-	2.Fixed bug with on / off extensions in gnome-tweak-tool. 
-	3.It is evident that css-file is not loaded in the code. However, GNOME will connect automatically. Almost all design changes occur in the 		file stylesheet.css. In any case does not load css-files via js - script. Otherwise, the extension will not turn off after gnome-tweak-tool. 		
-	4.Images folder has been deleted. 
-	5.Css-file has been simplified compared to the previous. 
-	
+/* Numix/Ozon Project 2014
+ * 
+ * Extension's version: 0.3
+ * 
+ * 0.2 Changes:
+ * 	1.Code has been simplified.
+ * 	2.Fixed bug with on / off extensions in gnome-tweak-tool.
+ * 	3.It is evident that css-file is not loaded in the code.
+ * 		However, GNOME will connect automatically.
+ * 		Almost all design changes occur in the file stylesheet.css. 
+ * 		In any case DO NOT load css-files via js - script. 
+ * 		Otherwise, the extension will not turn off after gnome-tweak-tool.
+ * 	4.Images folder has been deleted.
+ * 	5.Css-file has been simplified compared to the previous.
+ * 
+ * 0.3 Changes: 
+ * 	1. Embrace CamelCase for clear function naming and readability
+ * 	2. Added Connect Handler ID's we can grab to disconnect in a clean way
+ * 	3. Separate intial recoloring of panel from transparency functions
+ * 	4. Added constant Panel Object for the sake of simplicity
+ * 	5. Cleaned init cause it was all duplicated code from enable (and its supposed to be empty anyways)
+ * 	6. Cleaned up credits
+ * 
+ * Authors: 
+ * 	Vladimir Khrustaliov (vova.jameson2010@yandex.ru|https://plus.google.com/u/0/105238933702957776242/)
+ * 	Joern Konopka (cldx3000@gmail.com)
+ *  Please add yourself to the list, we should keep an Authors file for this maybe
+ */
 
-Waiting for feedback.
-
-Connect with me on:
-VK - http://vk.com/zzz_jameson_zzz
-Facebook - https://www.facebook.com/profile.php?id=100006124748177
-Google + - https://plus.google.com/u/0/105238933702957776242/posts
-E-mail: vova.jameson2010@yandex.ru
-*/
-
-const St = imports.gi.St;
 const Main = imports.ui.main;
+const Panel = imports.ui.main.panel;
 
-function init(extensionMeta){
-	let defaultStylesheet = Main.getThemeStylesheet();
-  
-	Main.overview.connect('showing', opacityOn);//When we open the overview, function is performed "opacityOn ()"
-	Main.overview.connect('hiding', opacityOff);//When we close the overview, function is performed "opacityOff ()"
-}
-function opacityOn(){
-	imports.ui.main.panel.actor.set_style('background-color: rgba(0,0,0,0)');//Establish a transparent background panel while executing
-}
-function opacityOff(){
-	imports.ui.main.panel.actor.set_style('background-color: #2d2d2d');//Remove the transparent background
-}
-function std(){
-	imports.ui.main.panel.actor.set_style('background-color: black');//Establish a black background panel while executing
+
+function init(){
+	/*  do nothing  */
 }
 
-function enable(){ //What happens if the extension starts.
-
-	opacityOff();//Specify the desired color panel.
-	Main.overview.connect('showing', opacityOn);//When we open the overview, function is performed "opacityOn ()"
-	Main.overview.connect('hiding', opacityOff);//When we close the overview, function is performed "opacityOff ()"
-
+function setPanelTransparent(){
+	Panel.actor.set_style('background-color: rgba(0,0,0,0)');
 }
 
-function disable(){//What happens if the extension is turned off.
-
-	std();//Return standard color panel.
-	Main.overview.connect('showing', std);//When we open the overview, function is performed "std ()"
-	Main.overview.connect('hiding', std);//When we close the overview, function is performed "std ()"
-
+function unsetPanelTransparent(){
+	Panel.actor.set_style('background-color: #2d2d2d');
 }
 
+function setPanelSolidColor(){
+	Panel.actor.set_style('background-color: #2d2d2d');
+}
+
+function setPanelDefaultColor(){
+	Panel.actor.set_style('background-color: black');
+}
+
+function enable(){ 
+	setPanelSolidColor();
+	this.showingHandler = Main.overview.connect('showing', setPanelTransparent);
+	this.hidingHandler = Main.overview.connect('hiding', unsetPanelTransparent);
+}
+
+function disable(){
+	setPanelDefaultColor();
+	Main.overview.disconnect(this.showingHandler);
+	Main.overview.disconnect(this.hidingHandler);
+}

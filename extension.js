@@ -24,12 +24,11 @@
  * Authors: 
  * 	Vladimir Khrustaliov (vova.jameson2010@yandex.ru|https://plus.google.com/u/0/105238933702957776242/)
  * 	Joern Konopka (cldx3000@gmail.com)
- *  Please add yourself to the list, we should keep an Authors file for this maybe
+ *  Please add yourseld to the list, we should keep an Authors file for this maybe
  */
 
 const Main = imports.ui.main;
 const Panel = imports.ui.main.panel;
-
 
 function init(){
 	/*  do nothing  */

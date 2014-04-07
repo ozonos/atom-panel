@@ -1,2 +1,2 @@
-nos-panel
-=========
+Atom panel
+==========

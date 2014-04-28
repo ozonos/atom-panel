@@ -1,116 +1,225 @@
-/* Numix/Ozon Project 2014
- * 
- * Extension's version: 0.3.1
- * 
- * 0.2 Changes by Vladimir Khrustaliov:
- * 	1.Code has been simplified.
- * 	2.Fixed bug with on / off extensions in gnome-tweak-tool.
- * 	3.It is evident that css-file is not loaded in the code.
- * 		However, GNOME will connect automatically.
- * 		Almost all design changes occur in the file stylesheet.css. 
- * 		In any case DO NOT load css-files via js - script. 
- * 		Otherwise, the extension will not turn off after gnome-tweak-tool.
- * 	4.Images folder has been deleted.
- * 	5.Css-file has been simplified compared to the previous.
- * 
- * 0.3 Changes by Joern Konopka: 
- * 	1. Embrace CamelCase for clear function naming and readability
- * 	2. Added Connect Handler ID's we can grab to disconnect in a clean way
- * 	3. Separate intial recoloring of panel from transparency functions
- * 	4. Added constant Panel Object for the sake of simplicity
- * 	5. Cleaned init cause it was all duplicated code from enable (and its supposed to be empty anyways)
- * 	6. Cleaned up credits
- *
- * 0.3.1 Changes by Vladimir Khrustaliov:
- *	1.Added legacy indicator
- * 
- * Authors: 
- * 	Vladimir Khrustaliov (vova.jameson2010@yandex.ru|https://plus.google.com/u/0/105238933702957776242/)
- * 	Joern Konopka (cldx3000@gmail.com)
- *  Please add yourself to the list, we should keep an Authors file for this maybe
- */
+
+
+const Clutter = imports.gi.Clutter;
+const Shell = imports.gi.Shell;
 const St = imports.gi.St;
 const Main = imports.ui.main;
-const Panel = imports.ui.main.panel;
-const AggregateMenu = imports.ui.main.panel.statusArea.aggregateMenu;
+const GLib = imports.gi.GLib;
+const Lang = imports.lang;
+const Panel = imports.ui.panel;
+const PanelMenu = imports.ui.panelMenu;
+const Meta = imports.gi.Meta;
+const Mainloop = imports.mainloop;
+const NotificationDaemon = imports.ui.notificationDaemon;
 
-let  button, icon, setIcon, buttonEvenet;
+let trayAddedId = 0;
+let trayRemovedId = 0;
+let getSource = null;
+let icons = [];
+let notificationDaemon;
+let button;
+let iconChange;
 var me = 'shouldBeHide';
 
-function changeAggregateStatus(){
-//Don't touch code  in this function! It works on the magic! 
-	if(me == 'shouldBeHide'){
-		
-		AggregateMenu.actor.hide();
-		
-		setIcon = new St.Icon({ icon_name: 'pane-show-symbolic',
-		             	     	style_class: 'system-status-icon' });
-		button.remove_child(icon);
-		button.set_child(setIcon);
-		me = 'shouldBeShow';	
-
-	}
-	else if(me == 'shouldBeShow'){
-		AggregateMenu.actor.show();
-	
-		setIcon = new St.Icon({ icon_name: 'pane-hide-symbolic',
-		             	     	style_class: 'system-status-icon' });
-		button.remove_child(icon);
-		button.set_child(setIcon);
-		me = 'shouldBeHide';
-	}
-}
-
-function init(){
-	button = new St.Bin({ style_class: 'panel-button',
+function init() {
+    if (Main.notificationDaemon._fdoNotificationDaemon) {
+        notificationDaemon = Main.notificationDaemon._fdoNotificationDaemon;
+        getSource = Lang.bind(notificationDaemon, NotificationDaemon.FdoNotificationDaemon.prototype._getSource);
+    }
+    else {
+        notificationDaemon = Main.notificationDaemon;
+        getSource = Lang.bind(notificationDaemon, NotificationDaemon.NotificationDaemon.prototype._getSource);
+    }
+    	button = new St.Bin({ style_class: 'panel-button',
 			      reactive: true,
 		              can_focus: true,
 		              x_fill: true,
 		              y_fill: false,
 		              track_hover: true });
-	icon = new St.Icon({ icon_name: 'pane-hide-symbolic',
+	iconChange = new St.Icon({ icon_name: 'pane-show-symbolic',
 		             style_class: 'system-status-icon' });
-	button.set_child(icon);
+	button.set_child(iconChange);
 }
 
-function setPanelTransparent(){
-	Panel.actor.set_style('background-color: rgba(0,0,0,0)');
+function enable() {
+    GLib.idle_add(GLib.PRIORITY_LOW, moveToTop);
 }
 
-function unsetPanelTransparent(){
-	Panel.actor.set_style('background-color: #2d2d2d');
+function createSource (title, pid, ndata, sender, trayIcon) { 
+  if (trayIcon) {
+    onTrayIconAdded(this, trayIcon, title);
+    return null;
+  }
+
+  return getSource(title, pid, ndata, sender, trayIcon);
+};
+
+function onTrayIconAdded(o, icon, role) {
+    let wmClass = icon.wm_class ? icon.wm_class.toLowerCase() : '';
+    if (NotificationDaemon.STANDARD_TRAY_ICON_IMPLEMENTATIONS[wmClass] !== undefined)
+        return;
+
+    let buttonBox = new PanelMenu.ButtonBox();
+    let box = buttonBox.actor;
+    let parent = box.get_parent();
+
+    let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+    let iconSize = Panel.PANEL_ICON_SIZE * scaleFactor;
+
+    icon.set_size(iconSize, iconSize);
+    box.add_actor(icon);
+
+    icon.reactive = true;
+
+    if (parent)
+        parent.remove_actor(box);
+
+    icons.push(icon);
+    
+    Main.panel._rightBox.insert_child_at_index(button, 0);
+    Main.panel._rightBox.insert_child_at_index(box, 0);
+   
+
+    let clickProxy = new St.Bin({ width: iconSize, height: iconSize });
+    clickProxy.reactive = true;
+    Main.uiGroup.add_actor(clickProxy);
+
+    icon._proxyAlloc = Main.panel._rightBox.connect('allocation-changed', function() {
+        Meta.later_add(Meta.LaterType.BEFORE_REDRAW, function() {
+            let [x, y] = icon.get_transformed_position();
+            clickProxy.set_position(x, y);
+        });
+    });
+
+    icon.connect("destroy", function() {
+        Main.panel._rightBox.disconnect(icon._proxyAlloc);
+        clickProxy.destroy();
+    });
+
+    clickProxy.connect('button-release-event', function(actor, event) {
+        icon.click(event);
+    });
+
+    icon._clickProxy = clickProxy;
+
+    
+    Meta.later_add(Meta.LaterType.BEFORE_REDRAW, function() {
+        let [x, y] = icon.get_transformed_position();
+        clickProxy.set_position(x, y);
+        return false;
+    });
+    let timerId = 0;
+    let i = 0;
+    timerId = Mainloop.timeout_add(500, function() {
+        icon.set_size(icon.width == iconSize ? iconSize - 1 : iconSize,
+                      icon.width == iconSize ? iconSize - 1 : iconSize);
+        i++;
+        if (i == 2)
+            Mainloop.source_remove(timerId);
+    });
+    buttonEvent = button.connect('button-press-event', function(){
+    
+    if(me == 'shouldBeHide'){
+		
+		box.hide();        
+		
+		setIcon = new St.Icon({ icon_name: 'pane-hide-symbolic',
+		             	     	style_class: 'system-status-icon' });
+		button.remove_child(iconChange);
+		button.set_child(setIcon);
+		me = 'shouldBeShow';	
+
+	}
+	else if(me == 'shouldBeShow'){
+       
+    box.show();
+	        
+	        
+		setIcon = new St.Icon({ icon_name: 'pane-show-symbolic',
+		             	     	style_class: 'system-status-icon' });
+		button.remove_child(iconChange);
+		button.set_child(setIcon);
+		me = 'shouldBeHide';
+		
+		}
+	});
+	  Main.panel.actor.set_style('background-color: #2d2d2d');
 }
 
-function setPanelSolidColor(){
-	Panel.actor.set_style('background-color: #2d2d2d');
+function onTrayIconRemoved(o, icon) {
+    let parent = icon.get_parent();
+    parent.destroy();
+    icon.destroy();
+    icons.splice(icons.indexOf(icon), 1);
 }
 
+function moveToTop() {
+    notificationDaemon._trayManager.disconnect(notificationDaemon._trayIconAddedId);
+    notificationDaemon._trayManager.disconnect(notificationDaemon._trayIconRemovedId);
+    trayAddedId = notificationDaemon._trayManager.connect('tray-icon-added', onTrayIconAdded);
+    trayRemovedId = notificationDaemon._trayManager.connect('tray-icon-removed', onTrayIconRemoved);
+    
+    notificationDaemon._getSource = createSource;
+
+    let toDestroy = [];
+    for (let i = 0; i < notificationDaemon._sources.length; i++) {
+        let source = notificationDaemon._sources[i];
+        if (!source.trayIcon)
+            continue;
+        let parent = source.trayIcon.get_parent();
+        parent.remove_actor(source.trayIcon);
+        onTrayIconAdded(this, source.trayIcon, source.initialTitle);
+        toDestroy.push(source);
+    }
+
+     for (let i = 0; i < toDestroy.length; i++) {
+        toDestroy[i].destroy();
+     }
+}
+
+function moveToTray() {
+    if (trayAddedId != 0) {
+        notificationDaemon._trayManager.disconnect(trayAddedId);
+        trayAddedId = 0;
+    }
+
+    if (trayRemovedId != 0) {
+        notificationDaemon._trayManager.disconnect(trayRemovedId);
+        trayRemovedId = 0;
+    }
+    
+    notificationDaemon._trayIconAddedId = notificationDaemon._trayManager.connect('tray-icon-added',
+                                                Lang.bind(notificationDaemon, notificationDaemon._onTrayIconAdded));
+    notificationDaemon._trayIconRemovedId = notificationDaemon._trayManager.connect('tray-icon-removed',
+                                                Lang.bind(notificationDaemon, notificationDaemon._onTrayIconRemoved));
+
+    notificationDaemon._getSource = getSource; 
+
+    for (let i = 0; i < icons.length; i++) {
+        let icon = icons[i];
+        let parent = icon.get_parent();
+        if (icon._clicked) {
+            icon.disconnect(icon._clicked);
+        }
+        icon._clicked = undefined;
+        if (icon._proxyAlloc) {
+            Main.panel._rightBox.disconnect(icon._proxyAlloc);
+        }
+        icon._clickProxy.destroy();
+        parent.remove_actor(icon);
+        parent.destroy();
+        notificationDaemon._onTrayIconAdded(notificationDaemon, icon);
+    }
+    
+    setPanelDefaultColor();
+	Main.panel._rightBox.remove_child(button);
+	
+    icons = [];
+}
 function setPanelDefaultColor(){
-	Panel.actor.set_style('background-color: black');
+	 Main.panel.actor.set_style('background-color: black');
 }
-
-function enable(){ 
-	setPanelSolidColor();
-	this.showingHandler = Main.overview.connect('showing', setPanelTransparent);
-	this.hidingHandler = Main.overview.connect('hiding', unsetPanelTransparent);
+function disable() {
+	moveToTray();
 	
-	Panel._rightBox.insert_child_at_index(button,2);//Insering legacy indicator 
-	/*Creating new event (show/hide aggregateMenu) when we clicked on the legacy indicator 
-	 *Attention: Don't appair "this." for "buttonEvent" as for "Main.overview" because the image willn't changed when we clicked on it.
-	 */
-	buttonEvent = button.connect('button-press-event', changeAggregateStatus);
-	
-
-	
-
-	
-}
-
-function disable(){
-	setPanelDefaultColor();
-	Main.overview.disconnect(this.showingHandler);
-	Main.overview.disconnect(this.hidingHandler);
-
-	button.disconnect(buttonEvent);//Disconnecting button's events 
-	Panel._rightBox.remove_child(button);//Deleting button from the Panel
 }

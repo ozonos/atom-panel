@@ -1,6 +1,6 @@
 {
-    "shell-version": ["3.10"],
-    "uuid": "atom-panel@numixproject.org",
+    "shell-version": ["3.10","3.12"],
+    "uuid": "atom-panel@ozonos.org",
     "name": "Atom panel",
     "description": "Custom panel for Atom desktop"
 }

@@ -7,6 +7,7 @@ const Main = imports.ui.main;
 const GLib = imports.gi.GLib;
 const Lang = imports.lang;
 const Panel = imports.ui.panel;
+const MainPanel = Main.panel
 const PanelMenu = imports.ui.panelMenu;
 const Meta = imports.gi.Meta;
 const Mainloop = imports.mainloop;
@@ -76,15 +77,15 @@ function onTrayIconAdded(o, icon, role) {
 
     icons.push(icon);
     
-    Main.panel._rightBox.insert_child_at_index(button, 0);
-    Main.panel._rightBox.insert_child_at_index(box, 0);
+    MainPanel._rightBox.insert_child_at_index(button, 0);
+    MainPanel._rightBox.insert_child_at_index(box, 0);
    
 
     let clickProxy = new St.Bin({ width: iconSize, height: iconSize });
     clickProxy.reactive = true;
     Main.uiGroup.add_actor(clickProxy);
 
-    icon._proxyAlloc = Main.panel._rightBox.connect('allocation-changed', function() {
+    icon._proxyAlloc = MainPanel._rightBox.connect('allocation-changed', function() {
         Meta.later_add(Meta.LaterType.BEFORE_REDRAW, function() {
             let [x, y] = icon.get_transformed_position();
             clickProxy.set_position(x, y);
@@ -92,7 +93,7 @@ function onTrayIconAdded(o, icon, role) {
     });
 
     icon.connect("destroy", function() {
-        Main.panel._rightBox.disconnect(icon._proxyAlloc);
+        MainPanel._rightBox.disconnect(icon._proxyAlloc);
         clickProxy.destroy();
     });
 
@@ -117,9 +118,9 @@ function onTrayIconAdded(o, icon, role) {
         if (i == 2)
             Mainloop.source_remove(timerId);
     });
-    buttonEvent = button.connect('button-press-event', function(){
+    let buttonEvent = button.connect('button-press-event', function(){
     
-    if(me == 'shouldBeHide'){
+	if(me == 'shouldBeHide'){
 		
 		box.hide();        
 		
@@ -132,9 +133,7 @@ function onTrayIconAdded(o, icon, role) {
 	}
 	else if(me == 'shouldBeShow'){
        
-    box.show();
-	        
-	        
+    		box.show();
 		setIcon = new St.Icon({ icon_name: 'pane-show-symbolic',
 		             	     	style_class: 'system-status-icon' });
 		button.remove_child(iconChange);
@@ -143,7 +142,7 @@ function onTrayIconAdded(o, icon, role) {
 		
 		}
 	});
-	  Main.panel.actor.set_style('background-color: #2d2d2d');
+	MainPanel.actor.set_style('background-color: #2d2d2d');
 }
 
 function onTrayIconRemoved(o, icon) {
@@ -203,7 +202,7 @@ function moveToTray() {
         }
         icon._clicked = undefined;
         if (icon._proxyAlloc) {
-            Main.panel._rightBox.disconnect(icon._proxyAlloc);
+            MainPanel._rightBox.disconnect(icon._proxyAlloc);
         }
         icon._clickProxy.destroy();
         parent.remove_actor(icon);
@@ -212,14 +211,14 @@ function moveToTray() {
     }
     
     setPanelDefaultColor();
-	Main.panel._rightBox.remove_child(button);
-	
+    MainPanel._rightBox.remove_child(button);
+   
     icons = [];
 }
 function setPanelDefaultColor(){
-	 Main.panel.actor.set_style('background-color: black');
+	 MainPanel.actor.set_style('background-color: black');
 }
 function disable() {
 	moveToTray();
-	
+	//button.disconnect(buttonEvent);
 }

@@ -13,21 +13,40 @@
  *
  */
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const GnomePanel = Me.imports.gnomepanel;
+const Lang = imports.lang;
+const Main = imports.ui.main;
 
 let oldPanel;
 let atomPanel;
 
 function init() {
-	oldPanel = new GnomePanel.GnomePanel();
+	_signalHandler = new Convenience.GlobalSignalHandler();
+    _signalHandler.push(
+        [
+            Main.overview,
+            'showing',
+            Lang.bind(this, setTransparent)
+        ],
+        [
+            Main.overview,
+            'hiding',
+            Lang.bind(this, setOpaque)
+        ]
+    );
 }
 
 function enable() {
-	oldPanel.hidePanel();
+	
 }
 
 function disable() {
-	oldPanel.showPanel();
+
 } 
+
+function setOpaque() {
+    Main.panel.actor.add_style_pseudo_class('desktop');
+}
+
+function setTransparent() {
+    Main.panel.actor.remove_style_pseudo_class('desktop');
+}

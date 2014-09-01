@@ -151,8 +151,8 @@ NotificationManager.prototype = {
 	        toDestroy[i].destroy();
 	     }
 
-		for (let i = 0; i < this.icons.length; i++) {
-			let icon = this.icons[i];
+		for (let i = 0; i < _this.icons.length; i++) {
+			let icon = _this.icons[i];
 			icon.get_parent().show()
 		}
 });

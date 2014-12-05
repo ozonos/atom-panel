@@ -249,14 +249,6 @@ Extension.prototype = {
 
 		_myDwell = MessageTray._trayDwellTimeout;
 		MessageTray._trayDwellTimeout = function() { return false; };
-		Main.wm.removeKeybinding('toggle-message-tray');
-		Main.wm.addKeybinding('toggle-message-tray',
-					new Gio.Settings({ schema_id: SHELL_KEYBINDINGS_SCHEMA }),
-					Meta.KeyBindingFlags.NONE,
-					Shell.KeyBindingMode.NORMAL |
-					Shell.KeyBindingMode.MESSAGE_TRAY |
-					Shell.KeyBindingMode.OVERVIEW,
-					Lang.bind(this, this._toggle));
 	},
 
 	disable: function () {
@@ -277,15 +269,6 @@ Extension.prototype = {
 			MessageTray._trayDwellTimeout = _myDwell;
 			_myDwell = 0;
 		}
-
-		Main.wm.removeKeybinding ('toggle-message-tray');
-		Main.wm.addKeybinding ('toggle-message-tray',
-					new Gio.Settings({ schema_id: SHELL_KEYBINDINGS_SCHEMA }),
-					Meta.KeyBindingFlags.NONE,
-					Shell.KeyBindingMode.NORMAL |
-					Shell.KeyBindingMode.MESSAGE_TRAY |
-					Shell.KeyBindingMode.OVERVIEW,
-					Lang.bind(Main.messageTray, Main.messageTray.toggleAndNavigate));
 	},
 	
 	_toggle: function () {

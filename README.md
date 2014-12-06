@@ -8,9 +8,13 @@ This application is written and tested on Gnome Shell 3.12, though it may be com
 
 ### Installation
 
-To install this extension, run
+To install this extension, run the following commands in your temrinal
 
-`make install` 
+```bash
+git clone https://github.com/ozonos/atom-panel.git
+cd atom-panel
+make install
+``` 
 
 ### License 
 

@@ -26,6 +26,10 @@ const Indicator = new Lang.Class({
 	}
 });
 
+let activitiesButtonActor;
+let labelActor;
+let iconActor;
+
 function NotificationManager() {
 	this._init();
 }
@@ -206,7 +210,30 @@ Extension.prototype = {
 		this._notificationManager = new NotificationManager();
 	},
 
+	getActivitiesButton: function(){
+
+		// Find Activities button
+        	let leftBoxChildren = Main.panel._leftBox.get_children();
+        	let activitiesButton;
+        	for (let child in leftBoxChildren){
+           		if(leftBoxChildren[child].get_child_at_index(0).name == "panelActivities"){
+                		activitiesButton = leftBoxChildren[child].get_child_at_index(0);            
+            		}
+       		}
+		return activitiesButton;
+    	},
+
 	enable: function () {
+
+		// Remove label add icon
+        	iconActor = new St.Icon({ style_class: 'popup-menu-icon' });
+        	iconActor.icon_name = 'view-more-symbolic';
+
+        	activitiesButtonActor = this.getActivitiesButton();
+		labelActor = activitiesButtonActor.label_actor;
+		activitiesButtonActor.remove_actor(labelActor);
+		activitiesButtonActor.add_actor(iconActor);
+
 		// Create a Indicator
 
 		this._show = new Indicator('pane-show-symbolic');
@@ -233,6 +260,13 @@ Extension.prototype = {
 	},
 
 	disable: function () {
+
+		// Remove icon and replace with label
+		activitiesButtonActor.remove_actor(iconActor);      
+		activitiesButtonActor.add_actor(labelActor);
+		activitiesButtonActor = null;
+		labelActor = null;
+		iconActor = null;
 		this._notificationManager.moveToTray();
 		this._show.destroy();
 		this._hide.destroy();

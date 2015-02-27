@@ -1,14 +1,20 @@
-Atom panel
+Atom Panel
 ==========
-A custom panel for gnome-shell. This panel is part of the Atom Extension Set designed for Ozon OS.
+A custom Panel for Gnome Shell. This Extension is part of the Atom Extension Set designed for Ozon OS.
+
+- Add Screenshot
+
 
 ### Compatibility
 
-This application is written and tested on Gnome Shell 3.12, though it may be compatible with Gnome Shell 3.10.
+3.10	| ???
+3.12	| yes
+3.14	| yes
+3.16	| ??? 
 
 ### Installation
 
-To install this extension, run the following commands in your temrinal
+To install this extension, run the following commands in your Terminal:
 
 ```bash
 git clone https://github.com/ozonos/atom-panel.git
@@ -18,4 +24,8 @@ make install
 
 ### License 
 
-This project is licensed with GPL version 3 and later.
+This project is licensed with GPL version 3 and later. See LICENSE for more details.
+
+### Changelog
+
+- 0.1 - First release

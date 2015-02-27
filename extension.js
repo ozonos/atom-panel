@@ -4,6 +4,7 @@ const St = imports.gi.St;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 const Lang = imports.lang;
+const LayoutManager = imports.ui.main.layoutManager;
 const Main = imports.ui.main;
 const PopupMenu = imports.ui.popupMenu;
 const Panel = imports.ui.panel;
@@ -11,6 +12,11 @@ const PanelMenu = imports.ui.panelMenu;
 const Meta = imports.gi.Meta;
 const Mainloop = imports.mainloop;
 const NotificationDaemon = imports.ui.notificationDaemon;
+const MessageTray = imports.ui.main.messageTray;
+
+const SHELL_KEYBINDINGS_SCHEMA = 'org.gnome.shell.keybindings';
+
+let _myDwell = 0;
 
 const Indicator = new Lang.Class({
 	Name: 'Indicator',
@@ -257,6 +263,19 @@ Extension.prototype = {
 			this._notificationManager.hidden = true;
 			this._show.actor.show();
 		}));
+
+		this._disableMessageTray();
+
+	},
+	
+	_disableMessageTray: function() {
+		if("_trayPressure" in LayoutManager) {
+			LayoutManager._trayPressure._keybindingMode =
+			Shell.KeyBindingMode.NONE;
+		}
+
+		_myDwell = MessageTray._trayDwellTimeout;
+		MessageTray._trayDwellTimeout = function() { return false; };
 	},
 
 	disable: function () {
@@ -270,6 +289,34 @@ Extension.prototype = {
 		this._notificationManager.moveToTray();
 		this._show.destroy();
 		this._hide.destroy();
+		this._enableMessageTray();
+	},
+
+	_enableMessageTray: function () {
+
+		if("_trayPressure" in LayoutManager) {
+			LayoutManager._trayPressure._keybindingMode =
+			Shell.KeyBindingMode.NORMAL | Shell.KeyBindingMode.OVERVIEW;
+		}
+
+		if(_myDwell) {
+			MessageTray._trayDwellTimeout = _myDwell;
+			_myDwell = 0;
+		}
+	},
+	
+	_toggle: function () {
+		if (this._notificationManager.hidden) {
+		 	this._notificationManager.moveToTop();
+			this._show.actor.hide();
+			this._notificationManager.hidden = false;
+			this._hide.actor.show();
+		} else {
+			this._notificationManager.moveToTray();
+			this._hide.actor.hide();
+			this._notificationManager.hidden = true;
+			this._show.actor.show();
+		}
 	}
 }
 

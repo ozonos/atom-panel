@@ -11,8 +11,6 @@ const PanelMenu = imports.ui.panelMenu;
 const Meta = imports.gi.Meta;
 const Mainloop = imports.mainloop;
 const NotificationDaemon = imports.ui.notificationDaemon;
-//const Me = imports.misc.extensionUtils.getCurrentExtension();
-
 
 const Indicator = new Lang.Class({
 	Name: 'Indicator',
@@ -234,7 +232,7 @@ Extension.prototype = {
 		// Replace Label with Icon
         	iconActor = new St.Icon({  icon_name: 'view-windows-symbolic',
 					   style_class: 'system-status-icon' });
-        	
+
         	activitiesButtonActor = this.getActivitiesButton();
 		labelActor = activitiesButtonActor.label_actor;
 		activitiesButtonActor.remove_actor(labelActor);
@@ -280,6 +278,5 @@ Extension.prototype = {
 }
 
 function init(extensionMeta) {
-	
 	return new Extension(extensionMeta.path);
 }

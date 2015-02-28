@@ -21,7 +21,7 @@ const Indicator = new Lang.Class({
 
 		this.actor.add_actor(new St.Icon({
 			icon_name: icon,
-			style_class: 'popup-menu-icon'
+			style_class: 'system-status-icon'
 		}));
 	}
 });

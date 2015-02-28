@@ -227,7 +227,7 @@ Extension.prototype = {
 
 		// Remove label add icon
         	iconActor = new St.Icon({ style_class: 'popup-menu-icon' });
-        	iconActor.icon_name = 'view-more-symbolic';
+        	iconActor.icon_name = 'view-windows-symbolic';
 
         	activitiesButtonActor = this.getActivitiesButton();
 		labelActor = activitiesButtonActor.label_actor;

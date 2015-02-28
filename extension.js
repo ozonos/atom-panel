@@ -11,6 +11,8 @@ const PanelMenu = imports.ui.panelMenu;
 const Meta = imports.gi.Meta;
 const Mainloop = imports.mainloop;
 const NotificationDaemon = imports.ui.notificationDaemon;
+//const Me = imports.misc.extensionUtils.getCurrentExtension();
+
 
 const Indicator = new Lang.Class({
 	Name: 'Indicator',
@@ -25,6 +27,7 @@ const Indicator = new Lang.Class({
 		}));
 	}
 });
+
 
 let activitiesButtonActor;
 let labelActor;
@@ -199,15 +202,18 @@ NotificationManager.prototype = {
 	}
 }
 
-function Extension() {
-	this._init();
+function Extension(icon_path) {
+	this._init(icon_path);
 }
 
 Extension.prototype = {
-	_init: function() {
+	_init: function(icon_path) {
 		this._indicators = [];
 		this._statusArea = Main.panel.statusArea;
 		this._notificationManager = new NotificationManager();
+
+		let theme = imports.gi.Gtk.IconTheme.get_default();
+    		theme.append_search_path(icon_path + "/icons");
 	},
 
 	getActivitiesButton: function(){
@@ -225,10 +231,10 @@ Extension.prototype = {
 
 	enable: function () {
 
-		// Remove label add icon
-        	iconActor = new St.Icon({ style_class: 'popup-menu-icon' });
-        	iconActor.icon_name = 'view-more-symbolic';
-
+		// Replace Label with Icon
+        	iconActor = new St.Icon({  icon_name: 'view-windows-symbolic',
+					   style_class: 'system-status-icon' });
+        	
         	activitiesButtonActor = this.getActivitiesButton();
 		labelActor = activitiesButtonActor.label_actor;
 		activitiesButtonActor.remove_actor(labelActor);
@@ -273,6 +279,7 @@ Extension.prototype = {
 	}
 }
 
-function init() {
-	return new Extension();
+function init(extensionMeta) {
+	
+	return new Extension(extensionMeta.path);
 }

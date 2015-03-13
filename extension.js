@@ -23,6 +23,7 @@ const Indicator = new Lang.Class({
 			icon_name: icon,
 			style_class: 'system-status-icon'
 		}));
+		this.actor.add_style_pseudo_class('small');
 	}
 });
 
@@ -240,8 +241,8 @@ Extension.prototype = {
 
 		// Create a Indicator
 
-		this._show = new Indicator('pane-show-symbolic');
-		this._hide = new Indicator('pane-hide-symbolic');
+		this._show = new Indicator('pan-start-symbolic');
+		this._hide = new Indicator('pan-end-symbolic');
 		Main.panel.addToStatusArea('Atom Hide Legacy Icons', this._hide);
 		Main.panel.addToStatusArea('Atom Show Legacy Icons', this._show);
 

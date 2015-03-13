@@ -28,4 +28,7 @@ This project is licensed with GPL version 3 and later. See LICENSE for more deta
 
 ### Changelog
 
+- 0.3.1 - New Legacy Icon Arrows
+- 0.3 - Added custom Icon for Activities Button
+- 0.2 - Bug fix round
 - 0.1 - First release
